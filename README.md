@@ -2,6 +2,8 @@
 
 This project is an optional bonus task. Task A aims to help you understand how to implment system calls and handle timer interrupts on XV6.
 
+Before writing code, you should make sure you have read "Chapter 4: Traps and device drivers" and "Chapter 6: Scheduling" from the xv6 book and studied the corresponding code. Also, you can review your code for project 1 and relevant slides for how to implement system calls on XV6.
+
 
 # Task A: Alarm
 
@@ -171,12 +173,10 @@ Please following the procedure below in your submission.
     ```
     cd TaskA
     make clean
-    cd ../TaskB
-    make clean
     ```
 3. List files that you have added or modified: ```git status```
 4. Stage the new and modified  files in your local repo: ```git add files-you-created-or-modified```
-5.  Commit the changes to your local repo: ```git commit -m "Finished Project #2"```
+5.  Commit the changes to your local repo: ```git commit -m "Finished Project #6"```
 6. Push the changes to the remote repo (i.e. github): ```git push``` Or ```git push origin master```. 
 7. Verify all changes have been push into the repo on github.
     + You can run "git status", "git log", and "git show" to the see the changes and commits you have made
