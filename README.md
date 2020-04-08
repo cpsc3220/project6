@@ -7,39 +7,43 @@ This project is an optional bonus task. Task A aims to help you understand how t
 
 <code>Add an alarm feature to xv6 that periodically alerts a process as it uses CPU time.</code>
 
-## Overview -- Timer
+## Overview -- Timer Interrupts
 
 Xv6 uses timer interrupts to maintain its clock and to enable it to switch among compute-bound
-processes; the yield calls in usertrap and kerneltrap cause this switching. Timer interrupts
+processes; the `yield()` calls in `usertrap()` and `kerneltrap()` cause this switching. Timer interrupts
 come from clock hardware attached to each RISC-V CPU. Xv6 programs this clock hardware
 to interrupt each CPU periodically.
 
 In this task, you'll add a feature to xv6 that periodically alerts a process as it uses CPU time. 
-This might be useful for compute-bound processes that want to limit how much CPU time they chew up, 
-or for processes that want to compute but also want to take some periodic action. 
+This might be useful for compute-bound processes which want to limit how much CPU time they chew up, 
+or for processes which want to compute but also want to take some periodic action. 
 
 More generally, you'll be implementing a primitive form of user-level interrupt/fault handlers; 
 you could use something similar to handle page faults in the application, for example. 
+
 Your solution is correct if it passes alarmtest and usertests.
 
 ## Specification
-
 + You should add a new `sigalarm(interval, handler)` system call. 
+
 + If an application calls `sigalarm(n, fn)`, then after every n "ticks" 
   of CPU time that the program consumes, the kernel should cause application 
-  function fn to be called. 
-+ When fn returns, the application should resume where it left off. 
+  function `fn` to be called. 
+
++ When `fn` returns, the application should resume where it left off. 
+
 + A tick is a fairly arbitrary unit of time in xv6, determined by how often 
   a hardware timer generates interrupts.
 
-+ Add the fuser/alarmtest.c to the Makefile. It won't compile correctly until 
-you've added sigalarm and sigreturn system calls.
++ Add the file __user/alarmtest.c to__ the Makefile. It won't compile correctly until 
+you've added `sigalarm` and `sigreturn` system calls.
 
-+ alarmtest calls sigalarm(2, periodic) in test0 to ask the kernel to 
-  force a call to periodic() every 2 ticks, and then spins for a while. 
-  You can see the assembly code for alarmtest in user/alarmtest.asm, which may be 
++ __alarmtest__ calls `sigalarm(2, periodic)` in __test0__ to ask the kernel to 
+  force a call to `periodic()` every 2 ticks, and then spins for a while. 
+  You can see the assembly code for __alarmtest__ in __user/alarmtest.asm__, which may be 
   handy for debugging. 
-+ Your solution is correct when alarmtest produces output like this and usertests also runs correctly:
+  
++ Your solution is correct when __alarmtest__ produces output like this and usertests also runs correctly:
 
 ```
 $ alarmtest
@@ -64,7 +68,7 @@ ALL TESTS PASSED
 $
 ```
 
-## Implementation Notes and Hints
+## Implementation Notes/Hints
 
 + The first challenge is to arrange that the handler is invoked 
   when the process's alarm interval expires. 
@@ -90,35 +94,35 @@ Get started by modifying the kernel to jump to the alarm handler in user space,
     int sigreturn(void);
     '''
 
-+ Update user/usys.pl (which generates user/usys.S), kernel/syscall.h, and kernel/syscall.c to allow
++ Update __user/usys.pl__ (which generates __user/usys.S__), __kernel/syscall.h__, and __kernel/syscall.c__ to allow
  `alarmtest` to invoke the `sigalarm` and `sigreturn` system calls.
 
-+ For now, `sys_sigreturn()` should just return zero.
++ For now, your `sys_sigreturn()` should just return zero.
 
-+ Your `sys_sigalarm()` should store the __alarm interval__ and the __pointer to the 
-handler function__ in new fields in the `proc` structure (in kernel/proc.h).
++ Your `sys_sigalarm()` should store the __alarm interval__ and the __pointer to the handler function__ in new fields in the `proc` structure (in __kernel/proc.h__).
 
-+ You'll need to keep track of how many ticks have passed since the last call 
-(or are left until the next call) to a process's alarm handler; 
-you'll need a new field in `struct proc` for this too. 
-+ You can initialize proc fields in allocproc() in proc.c.
++ You'll need to keep track of how many ticks have passed since the last call (or are left until the next call) to a process's alarm handler; you'll need a new field in __struct proc__ for this too. 
+
++ You can initialize `proc` fields in `allocproc()` in __proc.c__.
+
 + Every tick, the hardware clock forces an interrupt, which is handled in `usertrap()`; 
 you should add some code here.
+
 + You only want to manipulate a process's alarm ticks if there's a timer interrupt; you want something like
 
 ```
-  if(which_dev == 2) 
-     ...
+  if(which_dev == 2)  ...
 ```
     
 + Only invoke the alarm function if the process has a timer outstanding. 
-Note that the address of the user's alarm function might be 0 (e.g., in __alarmtest.asm__, __periodic__ 
-is at address 0).
+Note that the address of the user's alarm function might be 0 (e.g., in __alarmtest.asm__, __periodic__ is at address 0).
+
 + It will be easier to look at traps with gdb if you tell qemu to use only one CPU, which you can do by running
 
 ```
     make CPUS=1 qemu-gdb
 ```  
+
 + You've succeeded if alarmtest prints "alarm!".
 
 ### test1(): resume interrupted code
